@@ -230,7 +230,7 @@ public class MtcnnUtil {
 	 *
 	 * @param bbox
 	 * @param withFloor
-	 * @return
+	 * @return Returns array representing the squared bbox
 	 */
 	public static INDArray rerec(INDArray bbox, boolean withFloor) {
 		// convert bbox to square
@@ -261,7 +261,7 @@ public class MtcnnUtil {
 	 * @param boxes nd array with bounding boxes: [[x1, y1, x2, y2 score]]
 	 * @param threshold NMS threshold -  retain overlap <= thresh
 	 * @param nmsType NMS method to apply. Available values ('Min', 'Union')
-	 * @return
+	 * @return Returns the NMS result
 	 */
 	public static INDArray nonMaxSuppression(INDArray boxes, double threshold, NonMaxSuppressionType nmsType) {
 
@@ -344,7 +344,7 @@ public class MtcnnUtil {
 	 * @param reg
 	 * @param scale
 	 * @param stepThreshold
-	 * @return
+	 * @return Returns the generated bboxes
 	 */
 	public static INDArray[] generateBoundingBox(INDArray imap, INDArray reg, double scale, double stepThreshold) {
 
@@ -416,7 +416,7 @@ public class MtcnnUtil {
 	 * Manual (ineffient) implementation of where_np (https://github.com/deeplearning4j/deeplearning4j/issues/6184) for vector input
 	 * @param input
 	 * @param predicate
-	 * @return
+	 * @return Returns the Where indexes
 	 */
 	public static INDArray getIndexWhereVector(INDArray input, Predicate<Double> predicate) {
 
@@ -438,7 +438,7 @@ public class MtcnnUtil {
 	 *
 	 * @param input
 	 * @param predicate
-	 * @return
+	 * @return Returns the where matrix indexes
 	 */
 	public static INDArray getIndexWhereMatrix(INDArray input, Predicate<Double> predicate) {
 
@@ -562,7 +562,7 @@ public class MtcnnUtil {
 	/**
 	 *
 	 * @param image format [Batch, Channel, ]
-	 * @return
+	 * @return returns the result of the pre-whiten filtering
 	 */
 	public static INDArray preWhiten(INDArray image) {
 		INDArray mean = Nd4j.mean(image);
@@ -664,7 +664,7 @@ public class MtcnnUtil {
 	/**
 	 *
 	 * @param bufferedImage
-	 * @return
+	 * @return flat byte array representing the buffered image
 	 */
 	public static byte[] toByteArray(BufferedImage bufferedImage) {
 		return ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
