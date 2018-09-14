@@ -8,6 +8,35 @@
 	<artifactId>mtcnn</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
+	<contributors>
+		<contributor>
+			<name>Christian Tzolov</name>
+			<email>christian.tzolov@gmail.com</email>
+		</contributor>
+	</contributors>
+
+	<licenses>
+		<license>
+			<name>Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+			<distribution>repo</distribution>
+		</license>
+	</licenses>
+
+	<scm>
+		<connection>scm:git:https://github.com/tzolov/mtcnn-java</connection>
+		<developerConnection>scm:git:git@github.com:tzolov/mtcnn-java.git</developerConnection>
+		<url>https://github.com/tzolov/mtcnn-java</url>
+		<tag>HEAD</tag>
+	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>bintray-bigdata</id>
+			<url>https://api.bintray.com/maven/big-data/maven/mtcnn-java</url>
+		</repository>
+	</distributionManagement>
+
 	<properties>
 		<nd4j.version>1.0.0-beta2</nd4j.version>
 		<!--<nd4j.version>1.0.0-SNAPSHOT</nd4j.version>-->
