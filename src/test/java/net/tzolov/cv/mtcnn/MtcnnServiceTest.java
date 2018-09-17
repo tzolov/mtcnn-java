@@ -17,9 +17,10 @@ package net.tzolov.cv.mtcnn;
 
 import java.io.IOException;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.tzolov.cv.mtcnn.json.BoundingBox;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -40,23 +41,52 @@ public class MtcnnServiceTest {
 
 	@Test
 	public void testSingeFace() throws IOException {
+		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/Anthony_Hopkins_0002.jpg");
+		assertThat(toJson(faceAnnotations), equalTo("[{\"bbox\":{\"x\":75,\"y\":67,\"w\":95,\"h\":120}," +
+				"\"confidence\":0.9994938373565674," +
+				"\"landmarks\":[" +
+				"{\"type\":\"LEFT_EYE\",\"position\":{\"x\":101,\"y\":113}}," +
+				"{\"type\":\"RIGHT_EYE\",\"position\":{\"x\":147,\"y\":113}}," +
+				"{\"type\":\"NOSE\",\"position\":{\"x\":124,\"y\":136}}," +
+				"{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":105,\"y\":160}}," +
+				"{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":146,\"y\":160}}]}]"));
+	}
 
-		BoundingBox[] boundingBoxes = mtcnnService.faceDetection("classpath:/Anthony_Hopkins_0002.jpg");
-		String bboxJson = new ObjectMapper().writeValueAsString(boundingBoxes);
+	@Test
+	public void testFailToDetectFace() throws IOException {
+		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/broken.png");
+		assertThat(toJson(faceAnnotations), equalTo("[]"));
+	}
 
-		assertThat(bboxJson, equalTo("[{\"box\":[75,67,95,120],\"confidence\":0.9994938373565674," +
-				"\"keypoints\":{\"left_eye\":[101,113],\"right_eye\":[147,113],\"nose\":[124,136],\"mouth_left\":[105,160],\"mouth_right\":[146,160]}}]"));
+	@Ignore
+	@Test
+	public void testError1x() throws IOException {
+		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/error_0.png");
+		assertThat(toJson(faceAnnotations), equalTo("[]"));
 	}
 
 	@Test
 	public void testMultiFaces() throws IOException {
+		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/VikiMaxiAdi.jpg");
+		assertThat(toJson(faceAnnotations), equalTo("[{\"bbox\":{\"x\":102,\"y\":152,\"w\":70,\"h\":86}," +
+				"\"confidence\":0.9999865293502808," +
+				"\"landmarks\":[" +
+				"{\"type\":\"LEFT_EYE\",\"position\":{\"x\":122,\"y\":189}}," +
+				"{\"type\":\"RIGHT_EYE\",\"position\":{\"x\":154,\"y\":190}}," +
+				"{\"type\":\"NOSE\",\"position\":{\"x\":136,\"y\":203}}," +
+				"{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":122,\"y\":219}}," +
+				"{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":151,\"y\":220}}]}," +
+				"{\"bbox\":{\"x\":332,\"y\":94,\"w\":57,\"h\":69}," +
+				"\"confidence\":0.9992565512657166," +
+				"\"landmarks\":[" +
+				"{\"type\":\"LEFT_EYE\",\"position\":{\"x\":346,\"y\":120}}," +
+				"{\"type\":\"RIGHT_EYE\",\"position\":{\"x\":373,\"y\":121}}," +
+				"{\"type\":\"NOSE\",\"position\":{\"x\":357,\"y\":134}}," +
+				"{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":346,\"y\":147}}," +
+				"{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":370,\"y\":148}}]}]"));
+	}
 
-		BoundingBox[] boundingBoxes = mtcnnService.faceDetection("classpath:/VikiMaxiAdi.jpg");
-		String bboxJson = new ObjectMapper().writeValueAsString(boundingBoxes);
-
-		assertThat(bboxJson, equalTo("[{\"box\":[102,152,70,86],\"confidence\":0.9999865293502808," +
-				"\"keypoints\":{\"left_eye\":[122,189],\"right_eye\":[154,190],\"nose\":[136,203],\"mouth_left\":[122,219],\"mouth_right\":[151,220]}}," +
-				"{\"box\":[332,94,57,69],\"confidence\":0.9992565512657166," +
-				"\"keypoints\":{\"left_eye\":[346,120],\"right_eye\":[373,121],\"nose\":[357,134],\"mouth_left\":[346,147],\"mouth_right\":[370,148]}}]"));
+	private String toJson(FaceAnnotation[] faceAnnotations) throws JsonProcessingException {
+		return new ObjectMapper().writeValueAsString(faceAnnotations);
 	}
 }

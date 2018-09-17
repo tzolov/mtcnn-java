@@ -26,8 +26,6 @@ import java.util.function.Predicate;
 
 import javax.imageio.ImageIO;
 
-import net.tzolov.cv.mtcnn.json.BoundingBox;
-import net.tzolov.cv.mtcnn.json.Keypoints;
 import org.nd4j.linalg.api.buffer.DataBuffer;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -200,7 +198,8 @@ public class MtcnnUtil {
 		// if reg.shape[1] == 1:
 		//    reg = np.reshape(reg, (reg.shape[2], reg.shape[3]))
 		if (reg.shape()[1] == 1) {
-			reg = reg.reshape(reg.shape()[2], reg.shape()[3]);
+			//reg = reg.reshape(reg.shape()[2], reg.shape()[3]);
+			reg = reg.transpose();
 		}
 
 		// w = boundingbox[:, 2] - boundingbox[:, 0] + 1
@@ -501,38 +500,42 @@ public class MtcnnUtil {
 	}
 
 	/**
-	 * Converts totalBoxes array into {@link BoundingBox} and {@link Keypoints} domain json, appropriate for JSON serialization
+	 * Converts totalBoxes array into {@link FaceAnnotation} and {@link Keypoints} domain json, appropriate for JSON serialization
 	 *
 	 * @param totalBoxes input matrix with computed bounding boxes. Each row represents a separate bbox.
 	 * @param points input matrix with computed key points. Each row represents a set of keypoints for a bbox having the same row.
-	 * @return Returns {@link BoundingBox} array representing the detected faces and their {@link Keypoints}.
+	 * @return Returns {@link FaceAnnotation} array representing the detected faces and their {@link Keypoints}.
 	 */
-	public static BoundingBox[] toBoundingBoxes(INDArray totalBoxes, INDArray points) {
+	public static FaceAnnotation[] toFaceAnnotation(INDArray totalBoxes, INDArray points) {
+
+		if (totalBoxes.isEmpty()) {
+			return new FaceAnnotation[0];
+		}
 
 		Assert.isTrue(totalBoxes.rows() == points.rows(), "Inconsistent number of boxes and points");
 
-		BoundingBox[] boundingBoxes = new BoundingBox[totalBoxes.rows()];
+		FaceAnnotation[] faceAnnotations = new FaceAnnotation[totalBoxes.rows()];
 		for (int i = 0; i < totalBoxes.rows(); i++) {
-			BoundingBox bbox = new BoundingBox();
+			FaceAnnotation faceAnnotation = new FaceAnnotation();
 
-			bbox.setBox(new int[] { totalBoxes.getInt(i, 0), // x
+			faceAnnotation.setBoundingBox(FaceAnnotation.BoundingBox.of(totalBoxes.getInt(i, 0), // x
 					totalBoxes.getInt(i, 1), // y
 					totalBoxes.getInt(i, 2) - totalBoxes.getInt(i, 0), // w
-					totalBoxes.getInt(i, 3) - totalBoxes.getInt(i, 1) }); // h
-			bbox.setConfidence(totalBoxes.getDouble(i, 4));
+					totalBoxes.getInt(i, 3) - totalBoxes.getInt(i, 1))); //h
 
-			bbox.setKeypoints(new Keypoints());
+			faceAnnotation.setConfidence(totalBoxes.getDouble(i, 4));
 
-			bbox.getKeypoints().setLeftEye(new int[] { points.getInt(i, 0), points.getInt(i, 5) });
-			bbox.getKeypoints().setRightEye(new int[] { points.getInt(i, 1), points.getInt(i, 6) });
-			bbox.getKeypoints().setNose(new int[] { points.getInt(i, 2), points.getInt(i, 7) });
-			bbox.getKeypoints().setMouthLeft(new int[] { points.getInt(i, 3), points.getInt(i, 8) });
-			bbox.getKeypoints().setMouthRight(new int[] { points.getInt(i, 4), points.getInt(i, 9) });
+			faceAnnotation.setLandmarks(new FaceAnnotation.Landmark[5]);
+			faceAnnotation.getLandmarks()[0] = FaceAnnotation.Landmark.of(FaceAnnotation.Landmark.LandmarkType.LEFT_EYE, FaceAnnotation.Landmark.Position.of(points.getInt(i, 0), points.getInt(i, 5)));
+			faceAnnotation.getLandmarks()[1] = FaceAnnotation.Landmark.of(FaceAnnotation.Landmark.LandmarkType.RIGHT_EYE, FaceAnnotation.Landmark.Position.of(points.getInt(i, 1), points.getInt(i, 6)));
+			faceAnnotation.getLandmarks()[2] = FaceAnnotation.Landmark.of(FaceAnnotation.Landmark.LandmarkType.NOSE, FaceAnnotation.Landmark.Position.of(points.getInt(i, 2), points.getInt(i, 7)));
+			faceAnnotation.getLandmarks()[3] = FaceAnnotation.Landmark.of(FaceAnnotation.Landmark.LandmarkType.MOUTH_LEFT, FaceAnnotation.Landmark.Position.of(points.getInt(i, 3), points.getInt(i, 8)));
+			faceAnnotation.getLandmarks()[4] = FaceAnnotation.Landmark.of(FaceAnnotation.Landmark.LandmarkType.MOUTH_RIGHT, FaceAnnotation.Landmark.Position.of(points.getInt(i, 4), points.getInt(i, 9)));
 
-			boundingBoxes[i] = bbox;
+			faceAnnotations[i] = faceAnnotation;
 		}
 
-		return boundingBoxes;
+		return faceAnnotations;
 	}
 
 	/**
@@ -559,6 +562,7 @@ public class MtcnnUtil {
 	//    std_adj = np.maximum(std, 1.0/np.sqrt(x.size))
 	//    y = np.multiply(np.subtract(x, mean), 1/std_adj)
 	//    return y
+
 	/**
 	 *
 	 * @param image format [Batch, Channel, ]
@@ -641,24 +645,24 @@ public class MtcnnUtil {
 	 * @return New array of bytes
 	 */
 	public static byte[] toByteArray(BufferedImage image, String format) {
-
-		byte[] bytes = null;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
 		try {
 			ImageIO.write(image, format, baos);
-			bytes = baos.toByteArray();
-		} catch (IOException e) {
+			byte[] bytes = baos.toByteArray();
+			return bytes;
+		}
+		catch (IOException e) {
 			throw new IllegalStateException(e);
-		} finally {
+		}
+		finally {
 			try {
 				baos.close();
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 				throw new IllegalStateException(e);
 			}
 		}
-
-		return bytes;
 	}
 
 	/**

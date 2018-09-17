@@ -16,7 +16,6 @@
 package net.tzolov.cv.mtcnn;
 
 import java.awt.image.BufferedImage;
-import java.awt.image.DataBufferByte;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +27,6 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import net.tzolov.cv.mtcnn.json.BoundingBox;
 import org.apache.commons.io.IOUtils;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_imgproc;
@@ -125,22 +123,22 @@ public class MtcnnService {
 	 * @return Array of face bounding boxes found in the image
 	 * @throws IOException Incorrect image Uri.
 	 */
-	public BoundingBox[] faceDetection(String imageUri) throws IOException {
+	public FaceAnnotation[] faceDetection(String imageUri) throws IOException {
 		// [ 3 x H x W ]
 		INDArray image = this.imageLoader.asMatrix(new DefaultResourceLoader().getResource(imageUri).getInputStream())
 				.get(point(0), all(), all(), all()).dup();
 		return faceDetection(image);
 	}
 
-	public BoundingBox[] faceDetection(BufferedImage bImage) throws IOException {
+	public FaceAnnotation[] faceDetection(BufferedImage bImage) throws IOException {
 		INDArray ndImage3HW = this.imageLoader.asMatrix(bImage).get(point(0), all(), all(), all());
 		return faceDetection(ndImage3HW);
 	}
 
-	public BoundingBox[] faceDetection(byte[] byteImage, int h, int w) throws IOException {
+	public FaceAnnotation[] faceDetection(byte[] byteImage, int h, int w) throws IOException {
 		INDArray ndImage3HW = Nd4j.create(MtcnnUtil.imageByteToFloatArray(byteImage))
-				.reshape(new int[]{ h, w, 3})
-				.permutei(2,0,1);
+				.reshape(new int[] { h, w, 3 })
+				.permutei(2, 0, 1);
 		return faceDetection(ndImage3HW);
 	}
 
@@ -151,7 +149,7 @@ public class MtcnnService {
 	 * @return Array of face bounding boxes found in the image
 	 * @throws IOException Incorrect image Uri.
 	 */
-	public BoundingBox[] faceDetection(byte[] byteImage) throws IOException {
+	public FaceAnnotation[] faceDetection(byte[] byteImage) throws IOException {
 		ByteArrayInputStream is = new ByteArrayInputStream(byteImage);
 		BufferedImage bufferedImage = ImageIO.read(is);
 		return faceDetection(bufferedImage);
@@ -162,21 +160,21 @@ public class MtcnnService {
 	 * @param image3HW image to detect the faces in. Expected dimensions [ 3 x H x W ]
 	 * @return Array of face bounding boxes found in the image
 	 */
-	public BoundingBox[] faceDetection(INDArray image3HW) throws IOException {
+	public FaceAnnotation[] faceDetection(INDArray image3HW) throws IOException {
 
 		INDArray[] outputStageResult = this.rawFaceDetection(image3HW);
 
 		// Convert result into Bounding Box array
 		INDArray totalBoxes = outputStageResult[0];
 		INDArray points = outputStageResult[1];
-		if (totalBoxes.size(0) > 1) {
+		if (!totalBoxes.isEmpty() && totalBoxes.size(0) > 1) {
 			points = points.transpose();
 		}
 
-		return MtcnnUtil.toBoundingBoxes(totalBoxes, points);
+		return MtcnnUtil.toFaceAnnotation(totalBoxes, points);
 	}
 
-	public INDArray[] faceAlignment(INDArray image, BoundingBox[] bboxes, int margin, int alignedImageSize, boolean preWhiten) throws IOException {
+	public INDArray[] faceAlignment(INDArray image, FaceAnnotation[] bboxes, int margin, int alignedImageSize, boolean preWhiten) throws IOException {
 		INDArray[] alignments = new INDArray[bboxes.length];
 		for (int i = 0; i < bboxes.length; i++) {
 			alignments[i] = this.faceAlignment(image, bboxes[i], margin, alignedImageSize, preWhiten);
@@ -184,11 +182,12 @@ public class MtcnnService {
 		return alignments;
 	}
 
-	public INDArray faceAlignment(INDArray image, BoundingBox bbox, int margin, int alignedImageSize, boolean preWhiten) throws IOException {
-		int x = bbox.getBox()[0];
-		int y = bbox.getBox()[1];
-		int w = bbox.getBox()[2];
-		int h = bbox.getBox()[3];
+	public INDArray faceAlignment(INDArray image, FaceAnnotation faceAnnotation, int margin, int alignedImageSize, boolean preWhiten) throws IOException {
+		FaceAnnotation.BoundingBox bbox = faceAnnotation.getBoundingBox();
+		int x = bbox.getX();
+		int y = bbox.getY();
+		int w = bbox.getW();
+		int h = bbox.getH();
 
 		int y1 = Math.max(y - (margin / 2), 0);
 		int x1 = Math.max(x - (margin / 2), 0);
@@ -307,7 +306,7 @@ public class MtcnnService {
 			}
 		}
 
-		long numBoxes = totalBoxes.shape()[0];
+		long numBoxes = totalBoxes.isEmpty() ? 0 : totalBoxes.shape()[0];
 		if (numBoxes > 0) {
 			INDArray pick = MtcnnUtil.nonMaxSuppression(totalBoxes, 0.7, MtcnnUtil.NonMaxSuppressionType.Union);
 			totalBoxes = totalBoxes.get(new SpecifiedIndex(pick.toLongVector()), all());
@@ -355,7 +354,7 @@ public class MtcnnService {
 	private INDArray refinementStage(INDArray image, INDArray totalBoxes, MtcnnUtil.PadResult padResult) throws IOException {
 
 		// num_boxes = total_boxes.shape[0]
-		int numBoxes = (int) totalBoxes.shape()[0];
+		int numBoxes = totalBoxes.isEmpty() ? 0 : (int)totalBoxes.shape()[0];
 		// if num_boxes == 0:
 		//   return total_boxes, stage_status
 		if (numBoxes == 0) {
@@ -383,16 +382,21 @@ public class MtcnnService {
 		INDArray ipass = MtcnnUtil.getIndexWhereVector(score.transpose(), s -> s > stepsThreshold[1]);
 		//INDArray ipass = MtcnnUtil.getIndexWhereVector2(score.transpose(), Conditions.greaterThan(stepsThreshold[1]));
 
+		if (ipass.isEmpty()) {
+			totalBoxes = Nd4j.empty();
+			return totalBoxes;
+		}
 		// total_boxes = np.hstack([total_boxes[ipass[0], 0:4].copy(), np.expand_dims(score[ipass].copy(), 1)])
 		INDArray b1 = totalBoxes.get(new SpecifiedIndex(ipass.toLongVector()), interval(0, 4));
-		INDArray b2 = Nd4j.expandDims(score.get(ipass), 1);
+		INDArray b2 = ipass.isScalar() ? score.get(ipass).reshape(1, 1)
+				: Nd4j.expandDims(score.get(ipass), 1);
 		totalBoxes = Nd4j.hstack(b1, b2);
 
 		// mv = out0[:, ipass[0]]
 		INDArray mv = out0.get(new SpecifiedIndex(ipass.toLongVector()), all()).transposei();
 
 		// if total_boxes.shape[0] > 0:
-		if (totalBoxes.shape()[0] > 0) {
+		if (!totalBoxes.isEmpty() && totalBoxes.shape()[0] > 0) {
 			// pick = self.__nms(total_boxes, 0.7, 'Union')
 			INDArray pick = MtcnnUtil.nonMaxSuppression(totalBoxes.dup(), 0.7, MtcnnUtil.NonMaxSuppressionType.Union).transpose();
 
@@ -420,7 +424,7 @@ public class MtcnnService {
 	private INDArray[] outputStage(INDArray image, INDArray totalBoxes) throws IOException {
 
 		// num_boxes = total_boxes.shape[0]
-		int numBoxes = (int) totalBoxes.shape()[0];
+		int numBoxes = totalBoxes.isEmpty() ? 0 : (int) totalBoxes.shape()[0];
 		// if num_boxes == 0:
 		//   return total_boxes, stage_status
 		if (numBoxes == 0) {
@@ -468,12 +472,17 @@ public class MtcnnService {
 		INDArray ipass = MtcnnUtil.getIndexWhereVector(score.transpose(), s -> s > stepsThreshold[2]);
 		//INDArray ipass = MtcnnUtil.getIndexWhereVector2(score.transpose(), Conditions.greaterThan(stepsThreshold[2]));
 
+		if (ipass.isEmpty()) {
+			return new INDArray[] { Nd4j.empty(), Nd4j.empty() };
+		}
+
 		// points = points[:, ipass[0]]
 		points = points.get(new SpecifiedIndex(ipass.toLongVector()), all()).transposei();
 
 		// total_boxes = np.hstack([total_boxes[ipass[0], 0:4].copy(), np.expand_dims(score[ipass].copy(), 1)])
 		INDArray b1 = totalBoxes.get(new SpecifiedIndex(ipass.toLongVector()), interval(0, 4)).dup();
-		INDArray b2 = Nd4j.expandDims(score.get(ipass).dup(), 1);
+		INDArray b2 = ipass.isScalar() ? score.get(ipass).reshape(1, 1).dup()
+				: Nd4j.expandDims(score.get(ipass).dup(), 1);
 		totalBoxes = Nd4j.hstack(b1, b2);
 
 		// mv = out0[:, ipass[0]]
@@ -583,32 +592,22 @@ public class MtcnnService {
 		String imageUri1 = "file:src/test/resources/VikiMaxiAdi.jpg";
 		String imageUri2 = "file:src/test/resources/Anthony_Hopkins_0002.jpg";
 		String imageUri3 = "file:src/test/resources/pivotal-ipo-nyse.jpg";
+		String imageUri4 = "file:src/test/resources/bill-cook.jpg";
 
 		INDArray image = new Java2DNativeImageLoader().asMatrix(
-				new DefaultResourceLoader().getResource(imageUri3).getInputStream())
+				new DefaultResourceLoader().getResource(imageUri4).getInputStream())
 				.get(point(0), all(), all(), all()).dup();
 
-		BufferedImage bi2 = ImageIO.read(new DefaultResourceLoader().getResource(imageUri3).getInputStream());
-		INDArray image2 = new Java2DNativeImageLoader().asMatrix(bi2);
-
-		byte[] ba = MtcnnUtil.toByteArray(bi2);
-		float[] fImage = MtcnnUtil.imageByteToFloatArray(ba);
-		INDArray image3 = Nd4j.create(fImage).reshape(new int[]{ bi2.getHeight(), bi2.getWidth(), 3}).permutei(2,0,1);
-
-		ByteArrayInputStream is = new ByteArrayInputStream(MtcnnUtil.toByteArray(bi2, "png"));
-		BufferedImage img = ImageIO.read(is);
-		INDArray image4 = new Java2DNativeImageLoader().asMatrix(img);
-
-		BoundingBox[] boundingBoxes = mtcnnService.faceDetection(image);
-		System.out.println(boundingBoxes.length);
-		System.out.println("Result: " + new ObjectMapper().writeValueAsString(boundingBoxes));
+		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection(image);
+		System.out.println(faceAnnotations.length);
+		System.out.println("Result: " + new ObjectMapper().writeValueAsString(faceAnnotations));
 
 		int margin = 44; // margin for the crop around the bounding box (height, width) in pixels.
 		int alignedImageSize = 160; // image size for (height, width) in pixels.
 
 		int i = 0;
-		for (BoundingBox bbox : boundingBoxes) {
-			INDArray alignedFace = mtcnnService.faceAlignment(image, bbox, margin, alignedImageSize, false);
+		for (FaceAnnotation bbox : faceAnnotations) {
+			INDArray alignedFace = mtcnnService.faceAlignment(image, bbox, margin, alignedImageSize, true);
 			testWriteImage(alignedFace, "" + i++);
 		}
 	}

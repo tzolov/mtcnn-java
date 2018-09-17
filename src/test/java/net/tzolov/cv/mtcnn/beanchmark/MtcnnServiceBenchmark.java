@@ -3,7 +3,7 @@ package net.tzolov.cv.mtcnn.beanchmark;
 import java.io.IOException;
 
 import net.tzolov.cv.mtcnn.MtcnnService;
-import net.tzolov.cv.mtcnn.json.BoundingBox;
+import net.tzolov.cv.mtcnn.FaceAnnotation;
 import org.datavec.image.loader.Java2DNativeImageLoader;
 import org.nd4j.linalg.api.ndarray.INDArray;
 import org.nd4j.linalg.factory.Nd4j;
@@ -41,9 +41,9 @@ public class MtcnnServiceBenchmark {
 			mtcnnService = new MtcnnService(30, 0.709, new double[] { 0.6, 0.7, 0.7 });
 
 			image = new Java2DNativeImageLoader().asMatrix(
-					new DefaultResourceLoader().getResource("classpath:/pivotal-ipo-nyse.jpg").getInputStream())
+					//new DefaultResourceLoader().getResource("classpath:/pivotal-ipo-nyse.jpg").getInputStream())
 					//new DefaultResourceLoader().getResource("classpath:/Anthony_Hopkins_0002.jpg").getInputStream())
-					//new DefaultResourceLoader().getResource("classpath:/VikiMaxiAdi.jpg").getInputStream())
+					new DefaultResourceLoader().getResource("classpath:/VikiMaxiAdi.jpg").getInputStream())
 					.get(point(0), all(), all(), all()).dup();
 		}
 	}
@@ -53,7 +53,7 @@ public class MtcnnServiceBenchmark {
 	@BenchmarkMode(Mode.AverageTime)
 	@Threads(value = 1)
 	public void faceDetect(ExecutionPlan plan) throws IOException {
-		BoundingBox[] boundingBoxes = plan.mtcnnService.faceDetection(plan.image);
+		FaceAnnotation[] faceAnnotations = plan.mtcnnService.faceDetection(plan.image);
 	}
 
 	public static void main(String[] args) throws IOException, RunnerException {
