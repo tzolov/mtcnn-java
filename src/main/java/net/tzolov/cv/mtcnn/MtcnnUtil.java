@@ -15,8 +15,14 @@
  */
 package net.tzolov.cv.mtcnn;
 
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 import java.awt.image.DataBufferByte;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.FloatBuffer;
@@ -682,4 +688,39 @@ public class MtcnnUtil {
 		return fa;
 	}
 
+
+	public static BufferedImage drawFaceAnnotations(BufferedImage originalImage, FaceAnnotation[] faceAnnotations) {
+
+		Graphics2D g = originalImage.createGraphics();
+		g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+		Stroke stroke = g.getStroke();
+		Color color = g.getColor();
+		g.setStroke(new BasicStroke(3));
+		g.setColor(Color.YELLOW);
+
+		int radius = 2;
+		for (FaceAnnotation faceAnnotation : faceAnnotations) {
+			FaceAnnotation.BoundingBox bbox = faceAnnotation.getBoundingBox();
+			g.drawRect(bbox.getX(), bbox.getY(), bbox.getW(), bbox.getH());
+			for (FaceAnnotation.Landmark lm : faceAnnotation.getLandmarks()) {
+				g.fillOval(lm.getPosition().getX() - radius, lm.getPosition().getY() - radius,
+						2 * radius, 2 * radius);
+			}
+		}
+
+		g.setStroke(stroke);
+		g.setColor(color);
+
+		g.dispose();
+
+		return originalImage;
+	}
+
+	private static BufferedImage toBufferedImage(byte[] image) throws IOException {
+		try (ByteArrayInputStream is = new ByteArrayInputStream(image)) {
+			return ImageIO.read(is);
+		}
+	}
 }
