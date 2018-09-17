@@ -70,7 +70,7 @@ Use the following dependency to add the `mtcnn` utility to your project
 <dependency>
   <groupId>net.tzolov.cv</groupId>
   <artifactId>mtcnn</artifactId>
-  <version>0.0.3</version>
+  <version>0.0.4</version>
 </dependency>
 ```
 You may also need to add the following maven repository to your pom:
@@ -91,3 +91,12 @@ You may also need to add the following maven repository to your pom:
 
 Use this [MtcnnServiceBenchmark](https://github.com/tzolov/mtcnn-java/blob/master/src/test/java/net/tzolov/cv/mtcnn/beanchmark/MtcnnServiceBenchmark.java) to perform some basic benchmarking. You can change the image URI to test
 the performance with different images.   
+
+## Caveats
+
+The ND4J, DataVec, ND4J-Tensorflow and JavaCV are build on top of C++ cores. While this has many advantages such 
+as GPU and BLAS CPU math features, off-heap data sharing, low latency they have one significant drawback. By default they 
+will try to bundle all OS platforms (linux, android, windows, macos ..) than can add to up to 1G jar footprint!
+
+If you know what your target platform is going to be you can remedy this problem by setting the `-Djavacpp.platform=` property. For example `-Djavacpp.platform=macosx-x86_64` for MacOS target platform.  
+     
