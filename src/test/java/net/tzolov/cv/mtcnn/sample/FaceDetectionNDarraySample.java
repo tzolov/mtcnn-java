@@ -27,32 +27,33 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import net.tzolov.cv.mtcnn.FaceAnnotation;
 import net.tzolov.cv.mtcnn.MtcnnService;
 import net.tzolov.cv.mtcnn.MtcnnUtil;
+import org.datavec.image.loader.Java2DNativeImageLoader;
+import org.nd4j.linalg.api.ndarray.INDArray;
 
 import org.springframework.core.io.DefaultResourceLoader;
+
+import static org.nd4j.linalg.indexing.NDArrayIndex.all;
+import static org.nd4j.linalg.indexing.NDArrayIndex.point;
 
 /**
  * @author Christian Tzolov
  */
-public class FaceDetectionSample1 {
+public class FaceDetectionNDarraySample {
 
 	public static void main(String[] args) throws IOException {
 
 		MtcnnService mtcnnService = new MtcnnService(30, 0.709, new double[] { 0.6, 0.7, 0.7 });
 
-		ObjectMapper jsonMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+		// Image loading and conversion utilities (part of DataVec)
+		Java2DNativeImageLoader imageLoader = new Java2DNativeImageLoader();
 
-		try (InputStream imageInputStream = new DefaultResourceLoader()
-				.getResource("classpath:/pivotal-ipo-nyse.jpg").getInputStream()) {
-			// 1. Load the input image (you can use http:/, file:/ or classpath:/ URIs to resolve the input image
-			BufferedImage inputImage = ImageIO.read(imageInputStream);
-			// 2. Run face detection
-			FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection(inputImage);
-			// 3. Augment the input image with the detected faces
-			BufferedImage annotatedImage = MtcnnUtil.drawFaceAnnotations(inputImage, faceAnnotations);
-			// 4. Store face-annotated image
+		// Supports file:/, http:/ and classpath: URI prefixes.
+		String inputImageUri = "classpath:/pivotal-ipo-nyse.jpg";
+		try (InputStream imageInputStream = new DefaultResourceLoader().getResource(inputImageUri).getInputStream()) {
+			INDArray originalImage = imageLoader.asMatrix(imageInputStream).get(point(0), all(), all(), all()).dup();
+			BufferedImage annotatedImage = MtcnnUtil.drawFaceAnnotations(imageLoader.asBufferedImage(originalImage),
+					mtcnnService.faceDetection(originalImage));
 			ImageIO.write(annotatedImage, "png", new File("./AnnotatedImage.png"));
-			// 5. Print the face annotations as JSON
-			System.out.println("Face Annotations (JSON): " + jsonMapper.writeValueAsString(faceAnnotations));
 		}
 	}
 }
