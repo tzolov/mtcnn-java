@@ -4,7 +4,7 @@
 
 	<groupId>net.tzolov.cv</groupId>
 	<artifactId>mtcnn</artifactId>
-	<version>0.0.3</version>
+	<version>0.0.4-SNAPSHOT</version>
 
 	<contributors>
 		<contributor>
@@ -25,7 +25,7 @@
 		<connection>scm:git:https://github.com/tzolov/mtcnn-java</connection>
 		<developerConnection>scm:git:git@github.com:tzolov/mtcnn-java.git</developerConnection>
 		<url>https://github.com/tzolov/mtcnn-java</url>
-		<tag>mtcnn-0.0.3</tag>
+		<tag>HEAD</tag>
 	</scm>
 
 	<distributionManagement>
