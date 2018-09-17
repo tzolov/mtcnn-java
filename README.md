@@ -4,21 +4,23 @@
 
 > Note: This is still Work In Progress!
 
-Java and Tensorflow implementation of the [MTCNN Face Detector](https://arxiv.org/abs/1604.02878). It is based on David Sandberg's [FaceNet's MTCNN](https://github.com/davidsandberg/facenet/tree/master/src/align) 
-python implementation and the original [Zhang, K et al. (2016) ZHANG2016](https://arxiv.org/abs/1604.02878) paper and related [Matlab implementation](https://github.com/kpzhang93/MTCNN_face_detection_alignment).
+`Java` and `Tensorflow` implementation of the [MTCNN Face Detector](https://arxiv.org/abs/1604.02878). Based on David Sandberg's [FaceNet's MTCNN](https://github.com/davidsandberg/facenet/tree/master/src/align) 
+`python` implementation and the original [Zhang, K et al. (2016) ZHANG2016](https://arxiv.org/abs/1604.02878) paper and [Matlab implementation](https://github.com/kpzhang93/MTCNN_face_detection_alignment).
 
 ![Input Image](./src/test/resources/docs/scdf-face-detection-2.gif) 
 
-It reuses the `PNet`, `RNet` and `ONet` Tensorflow models created in [FaceNet's MTCNN](https://github.com/davidsandberg/facenet/tree/master/src/align) project and 
-initialized with the original pre-trained [weights](https://github.com/kpzhang93/MTCNN_face_detection_alignment/tree/master/code/codes/MTCNNv2/model). Find [here](https://github.com/davidsandberg/facenet/pull/866) 
-how to freeze those models.
+It reuses the `PNet`, `RNet` and `ONet` Tensorflow models build in [FaceNet's MTCNN](https://github.com/davidsandberg/facenet/tree/master/src/align) and 
+initialized with the original [weights](https://github.com/kpzhang93/MTCNN_face_detection_alignment/tree/master/code/codes/MTCNNv2/model). [Here](https://github.com/davidsandberg/facenet/pull/866) 
+you can find how to freeze the TF models.
 
-> Note that all necessary Tensorflow models are already pre-bundled with this project! No need to download or freeze those by yourself.
+> Note that the required Tensorflow models are already pre-bundled with this project! No need to download or freeze those by yourself.
 
-The MTCNN requires a lot of linear algebra computations such as multi-dimensional array computation. Therefore the [ND4J](https://deeplearning4j.org/docs/latest/nd4j-overview) library is used for implementing the 
- processing steps that connect the `PNet`, `RNet` and `ONet` Tensorflow networks. Furthermore the [JavaCV](https://github.com/bytedeco/javacv) is leverage for image manipulation and the ND4J-Tensorflow's GraphRunner is used to 
- inferring the pre-trained tensorflow models. Later allows to share the ND4J and JavaCV intermediate processing states directly with the tensorflow runner, off-heap without need of additional serialization/deserialization.        
+MTCNN involves significant amount of linear algebra operations, such as multi-dimensional array computations and so. Therefore the [ND4J](https://deeplearning4j.org/docs/latest/nd4j-overview) library is used for implementing the 
+ processing steps that connect the `PNet`, `RNet` and `ONet` Tensorflow networks. Furthermore [JavaCV](https://github.com/bytedeco/javacv) is leveraged for image manipulation and the `ND4J-Tensorflow` GraphRunner is used to 
+ inferring the pre-trained tensorflow models. The combination of those  libraries allows to share the processing states between the `ND4J`, `JavaCV`
+  and Tensorflow runners. It also provides off-heap memory management reduce data churn and lower the latency.         
 
+> The MtcnnService.java and MtcnnUtil.java methods keep the original NumPy python scripts as comments in front of the ND$J based method that implement the same logic in Java.
 ## Quick Start
 
 Samples like [FaceDetectionSample1.java](./src/test/java/net/tzolov/cv/mtcnn/sample/FaceDetectionSample1.java) demonstrates how to use `MtcnnService` for detecting faces in images.
@@ -98,5 +100,7 @@ The ND4J, DataVec, ND4J-Tensorflow and JavaCV are build on top of C++ cores. Whi
 as GPU and BLAS CPU math features, off-heap data sharing, low latency they have one significant drawback. By default they 
 will try to bundle all OS platforms (linux, android, windows, macos ..) than can add to up to 1G jar footprint!
 
-If you know what your target platform is going to be you can remedy this problem by setting the `-Djavacpp.platform=` property. For example `-Djavacpp.platform=macosx-x86_64` for MacOS target platform.  
+If you know what your target platform is going to be you can remedy this problem by setting the `-Djavacpp.platform=` property. For example `-Djavacpp.platform=macosx-x86_64` for MacOS target platform.
+
+Another long-term solution might be to replace all ND4J, DataVec and JavaCV logic using the newly released Tensorflow Java Ops API (ver. 1.10+)  
      
