@@ -87,6 +87,7 @@ You may also need to add the following maven repository to your pom:
 </repositories>
 ```
 
-## Benchmar
+## Benchmarking
+
 Use this [MtcnnServiceBenchmark](https://github.com/tzolov/mtcnn-java/blob/master/src/test/java/net/tzolov/cv/mtcnn/beanchmark/MtcnnServiceBenchmark.java) to perform some basic benchmarking. You can change the image URI to test
 the performance with different images.   
