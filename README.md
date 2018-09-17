@@ -7,7 +7,7 @@
 `Java` and `Tensorflow` implementation of the [MTCNN Face Detector](https://arxiv.org/abs/1604.02878). Based on David Sandberg's [FaceNet's MTCNN](https://github.com/davidsandberg/facenet/tree/master/src/align) 
 `python` implementation and the original [Zhang, K et al. (2016) ZHANG2016](https://arxiv.org/abs/1604.02878) paper and [Matlab implementation](https://github.com/kpzhang93/MTCNN_face_detection_alignment).
 
-[<img align="left" src="https://raw.githubusercontent.com/tzolov/mtcnn-java/master/src/test/resources/docs/scdf-face-detection-2.gif" alt="scdf-mtcnn" hspace="10"></img>](https://github.com/tzolov/computer-vision/blob/master/spring-cloud-starter-stream-processor-face-detection-mtcnn/README.adoc) It reuses the `PNet`, `RNet` and `ONet` Tensorflow models build in [FaceNet's MTCNN](https://github.com/davidsandberg/facenet/tree/master/src/align) and 
+[<img align="right" src="https://raw.githubusercontent.com/tzolov/mtcnn-java/master/src/test/resources/docs/scdf-face-detection-2.gif" alt="scdf-mtcnn" hspace="10" vspace="10"></img>](https://github.com/tzolov/computer-vision/blob/master/spring-cloud-starter-stream-processor-face-detection-mtcnn/README.adoc) It reuses the `PNet`, `RNet` and `ONet` Tensorflow models build in [FaceNet's MTCNN](https://github.com/davidsandberg/facenet/tree/master/src/align) and 
 initialized with the original [weights](https://github.com/kpzhang93/MTCNN_face_detection_alignment/tree/master/code/codes/MTCNNv2/model). [Here](https://github.com/davidsandberg/facenet/pull/866) 
 you can find how to freeze the TF models.
 
