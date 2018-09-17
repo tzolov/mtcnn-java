@@ -20,7 +20,6 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -55,13 +54,6 @@ public class MtcnnServiceTest {
 	@Test
 	public void testFailToDetectFace() throws IOException {
 		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/broken.png");
-		assertThat(toJson(faceAnnotations), equalTo("[]"));
-	}
-
-	@Ignore
-	@Test
-	public void testError1x() throws IOException {
-		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/error_0.png");
 		assertThat(toJson(faceAnnotations), equalTo("[]"));
 	}
 
