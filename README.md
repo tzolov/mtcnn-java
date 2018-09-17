@@ -21,10 +21,10 @@ The MTCNN requires a lot of linear algebra computations such as multi-dimensiona
 
 ## Quick Start
 
-Samples like [FaceDetectionSample1.java](./src/test/java/net/tzolov/cv/mtcnn/sample/FaceDetectionSample1.java) demonstrates how the `MtcnnService` can be used to detect faces in an image.
+Samples like [FaceDetectionSample1.java](./src/test/java/net/tzolov/cv/mtcnn/sample/FaceDetectionSample1.java) demonstrates how to use `MtcnnService` for detecting faces in images.
 ![Input Image](./src/test/resources/docs/AnnotatedImage.png)
 
-The essence the sample is this:
+The essence this sample is this:
 
 ```java
 // 1. Create face detection service.
