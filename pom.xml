@@ -21,6 +21,23 @@
 		</license>
 	</licenses>
 
+	<properties>
+		<!--<nd4j.version>1.0.0-beta2</nd4j.version>-->
+		<nd4j.version>1.0.0-SNAPSHOT</nd4j.version>
+
+		<tensorflow.version>1.9.0</tensorflow.version>
+		<javacpp-presets.version>1.4.2</javacpp-presets.version>
+
+		<openblas.version>0.3.0</openblas.version>
+
+		<mkl.version>2018.3</mkl.version>
+		<mkl-dnn.version>0.15</mkl-dnn.version>
+		<jmh.version>1.21</jmh.version>
+		<apache.commons>1.17</apache.commons>
+		<spring-framework.version>5.0.7.RELEASE</spring-framework.version>
+		<jackson.version>2.9.6</jackson.version>
+	</properties>
+
 	<scm>
 		<connection>scm:git:https://github.com/tzolov/mtcnn-java</connection>
 		<developerConnection>scm:git:git@github.com:tzolov/mtcnn-java.git</developerConnection>
@@ -35,68 +52,54 @@
 		</repository>
 	</distributionManagement>
 
-	<properties>
-		<nd4j.version>1.0.0-beta2</nd4j.version>
-		<!--<nd4j.version>1.0.0-SNAPSHOT</nd4j.version>-->
-		<tensorflow.version>1.9.0</tensorflow.version>
-		<openblas.version>0.3.0</openblas.version>
-		<javacpp-presets.version>1.4.2</javacpp-presets.version>
-		<mkl.version>2018.3</mkl.version>
-		<mkl-dnn.version>0.15</mkl-dnn.version>
-		<jmh.version>1.21</jmh.version>
-		<apache.commons>1.17</apache.commons>
-		<spring-framework.version>5.0.7.RELEASE</spring-framework.version>
-		<jackson.version>2.9.6</jackson.version>
-	</properties>
-
 	<dependencies>
 		<!-- for ND4J SnapShot only -->
+		<dependency>
+			<groupId>org.nd4j</groupId>
+			<artifactId>nd4j-native</artifactId>
+			<version>${nd4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bytedeco.javacpp-presets</groupId>
+			<artifactId>openblas-platform</artifactId>
+			<version>${openblas.version}-${javacpp-presets.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bytedeco.javacpp-presets</groupId>
+			<artifactId>mkl-platform</artifactId>
+			<version>${mkl.version}-${javacpp-presets.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.bytedeco.javacpp-presets</groupId>
+			<artifactId>mkl-dnn-platform</artifactId>
+			<version>${mkl-dnn.version}-${javacpp-presets.version}</version>
+		</dependency>
+		<!-- for ND4J SnapShot only -->
+
+		<!-- for ND4J RELEASE only -->
+		<!--<dependency>-->
+			<!--<groupId>org.nd4j</groupId>-->
+			<!--<artifactId>nd4j-native-platform</artifactId>-->
+			<!--<version>${nd4j.version}</version>-->
+		<!--</dependency>-->
 		<!--<dependency>-->
 			<!--<groupId>org.nd4j</groupId>-->
 			<!--<artifactId>nd4j-native</artifactId>-->
 			<!--<version>${nd4j.version}</version>-->
+			<!--<classifier>linux-x86_64-avx2</classifier>-->
 		<!--</dependency>-->
 		<!--<dependency>-->
-			<!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-			<!--<artifactId>openblas-platform</artifactId>-->
-			<!--<version>${openblas.version}-${javacpp-presets.version}</version>-->
+			<!--<groupId>org.nd4j</groupId>-->
+			<!--<artifactId>nd4j-native</artifactId>-->
+			<!--<version>${nd4j.version}</version>-->
+			<!--<classifier>macosx-x86_64-avx2</classifier>-->
 		<!--</dependency>-->
 		<!--<dependency>-->
-			<!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-			<!--<artifactId>mkl-platform</artifactId>-->
-			<!--<version>${mkl.version}-${javacpp-presets.version}</version>-->
+			<!--<groupId>org.nd4j</groupId>-->
+			<!--<artifactId>nd4j-native</artifactId>-->
+			<!--<version>${nd4j.version}</version>-->
+			<!--<classifier>windows-x86_64-avx2</classifier>-->
 		<!--</dependency>-->
-		<!--<dependency>-->
-			<!--<groupId>org.bytedeco.javacpp-presets</groupId>-->
-			<!--<artifactId>mkl-dnn-platform</artifactId>-->
-			<!--<version>${mkl-dnn.version}-${javacpp-presets.version}</version>-->
-		<!--</dependency>-->
-		<!-- for ND4J SnapShot only -->
-
-		<!-- for ND4J RELEASE only -->
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native-platform</artifactId>
-			<version>${nd4j.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native</artifactId>
-			<version>${nd4j.version}</version>
-			<classifier>linux-x86_64-avx2</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native</artifactId>
-			<version>${nd4j.version}</version>
-			<classifier>macosx-x86_64-avx2</classifier>
-		</dependency>
-		<dependency>
-			<groupId>org.nd4j</groupId>
-			<artifactId>nd4j-native</artifactId>
-			<version>${nd4j.version}</version>
-			<classifier>windows-x86_64-avx2</classifier>
-		</dependency>
 		<!-- for ND4J RELEASE only -->
 
 		<!-- Tensorflow -->

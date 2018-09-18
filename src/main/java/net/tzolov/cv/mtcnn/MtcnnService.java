@@ -17,7 +17,6 @@ package net.tzolov.cv.mtcnn;
 
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -26,7 +25,6 @@ import java.util.Map;
 
 import javax.imageio.ImageIO;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.IOUtils;
 import org.bytedeco.javacpp.opencv_core;
 import org.bytedeco.javacpp.opencv_imgproc;
@@ -167,7 +165,8 @@ public class MtcnnService {
 		// Convert result into Bounding Box array
 		INDArray totalBoxes = outputStageResult[0];
 		INDArray points = outputStageResult[1];
-		if (!totalBoxes.isEmpty() && totalBoxes.size(0) > 1) {
+		//if (!totalBoxes.isEmpty() && totalBoxes.size(0) > 1) { // 1.0.0-beta2
+		if (!totalBoxes.isEmpty() && totalBoxes.size(0) > 0) { // 1.0.0-SNAPSHOT
 			points = points.transpose();
 		}
 
@@ -585,42 +584,4 @@ public class MtcnnService {
 		//[0, W, H, 3]
 		return imageLoader.asMatrix(mat);
 	}
-
-	public static void main(String[] args) throws IOException {
-		//MtcnnService mtcnnService = new MtcnnService(20, 0.709, new double[] { 0.6, 0.7, 0.7 });
-		MtcnnService mtcnnService = new MtcnnService(30, 0.709, new double[] { 0.6, 0.7, 0.7 });
-		String imageUri1 = "file:src/test/resources/VikiMaxiAdi.jpg";
-		String imageUri2 = "file:src/test/resources/Anthony_Hopkins_0002.jpg";
-		String imageUri3 = "file:src/test/resources/pivotal-ipo-nyse.jpg";
-		String imageUri4 = "file:src/test/resources/bill-cook.jpg";
-
-		INDArray image = new Java2DNativeImageLoader().asMatrix(
-				new DefaultResourceLoader().getResource(imageUri4).getInputStream())
-				.get(point(0), all(), all(), all()).dup();
-
-		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection(image);
-		System.out.println(faceAnnotations.length);
-		System.out.println("Result: " + new ObjectMapper().writeValueAsString(faceAnnotations));
-
-		int margin = 44; // margin for the crop around the bounding box (height, width) in pixels.
-		int alignedImageSize = 160; // image size for (height, width) in pixels.
-
-		int i = 0;
-		for (FaceAnnotation bbox : faceAnnotations) {
-			INDArray alignedFace = mtcnnService.faceAlignment(image, bbox, margin, alignedImageSize, true);
-			testWriteImage(alignedFace, "" + i++);
-		}
-	}
-
-	private static void testWriteImage(INDArray ndImage, String prefix) {
-		try {
-			BufferedImage image = new Java2DNativeImageLoader().asBufferedImage(ndImage);
-			ImageIO.write(image, "png", new File("target/cropped" + prefix + ".png"));
-			System.out.println(".");
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
 }

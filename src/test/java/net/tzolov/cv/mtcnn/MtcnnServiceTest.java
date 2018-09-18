@@ -78,6 +78,14 @@ public class MtcnnServiceTest {
 				"{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":370,\"y\":148}}]}]"));
 	}
 
+
+	@Test
+	public void testFacesAlignment() throws IOException {
+		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/pivotal-ipo-nyse.jpg");
+		assertThat(faceAnnotations.length, equalTo(7));
+//		assertThat(toJson(faceAnnotations), equalTo(""));
+	}
+
 	private String toJson(FaceAnnotation[] faceAnnotations) throws JsonProcessingException {
 		return new ObjectMapper().writeValueAsString(faceAnnotations);
 	}

@@ -13,18 +13,21 @@ you can find how to freeze the TF models.
 
 > Note that the required Tensorflow models are already pre-bundled with this project! No need to download or freeze those by yourself.
 
-MTCNN involves significant amount of linear algebra operations, such as multi-dimensional array computations and so. Therefore the [ND4J](https://deeplearning4j.org/docs/latest/nd4j-overview) library is used for implementing the 
- processing steps that connect the `PNet`, `RNet` and `ONet` Tensorflow networks. Furthermore [JavaCV](https://github.com/bytedeco/javacv) is leveraged for image manipulation and the `ND4J-Tensorflow` GraphRunner is used to 
- inferring the pre-trained tensorflow models. The combination of those  libraries allows to share the processing states between the `ND4J`, `JavaCV`
-  and Tensorflow runners. It also provides off-heap memory management reduce data churn and lower the latency.         
+The MTCNN technique involves significant amount of linear algebra operations, such as multi-dimensional array computations and so. 
+Therefore the [ND4J](https://deeplearning4j.org/docs/latest/nd4j-overview) library is leveraged for implementing all (pre)processing steps 
+required for flowing the data through the `PNet`, `RNet` and `ONet` Tensorflow networks. Furthermore [JavaCV](https://github.com/bytedeco/javacv) is 
+leveraged for image manipulation and the `ND4J-Tensorflow` GraphRunner is used to inferring the pre-trained tensorflow models. 
+The combination of those libraries allows to exchange processing states between the `ND4J`, `JavaCV` and `Tensorflow` with little data churn. 
+It also provides off-heap memory management and native support for GPU and BLAS processor features.         
 
-> The MtcnnService.java and MtcnnUtil.java methods keep the original NumPy python scripts as comments in front of the ND$J based method that implement the same logic in Java.
+> NOTE: You can find the original NumPy/Python code snippets as inline comments in front of the equivalent ND4J java implementations.
+
 ## Quick Start
 
-Samples like [FaceDetectionSample1.java](./src/test/java/net/tzolov/cv/mtcnn/sample/FaceDetectionSample1.java) demonstrates how to use `MtcnnService` for detecting faces in images.
+The [FaceDetectionSample1.java](./src/test/java/net/tzolov/cv/mtcnn/sample/FaceDetectionSample1.java) demonstrates how to use `MtcnnService` for detecting faces in images.
 ![Input Image](./src/test/resources/docs/AnnotatedImage.png)
 
-The essence this sample is this:
+Here is the essence this sample:
 
 ```java
 // 1. Create face detection service.
@@ -43,7 +46,7 @@ try (InputStream imageInputStream = new DefaultResourceLoader() .getResource("cl
     System.out.println("Face Annotations (JSON): " + new ObjectMapper().writeValueAsString(faceAnnotations));
 }
 ```
-It takes an input image detect the faces in it produces json face annotations and augments the image with the faces. 
+It takes an input image detect the faces, produces json annotations and augments the image with the faces. 
 
 The face annotation json format looks like this:
 
@@ -60,7 +63,7 @@ The face annotation json format looks like this:
 }, { ... 
 ```
 ## Rea-Time Face Detection with Spring Cloud Data Flow 
-The [spring-cloud-starter-stream-processor-face-detection-mtcnn](https://github.com/tzolov/computer-vision/blob/master/spring-cloud-starter-stream-processor-face-detection-mtcnn/README.adoc) is 
+The [spring-cloud-starter-stream-processor-face-detection-mtcnn](https://github.com/tzolov/computer-vision/tree/master/spring-cloud-starter-stream-processor-face-detection-mtcnn) is 
 Spring Cloud Data Flow processor that allows detecting and faces in real time from input image or video streams.
 
 ## Maven setup
@@ -73,16 +76,12 @@ Use the following dependency to add the `mtcnn` utility to your project
   <version>0.0.4</version>
 </dependency>
 ```
-You may also need to add the following maven repository to your pom:
+Also register `jcentral` to your list of maven repository (it is available out of the box for Gradle).
 ```xml
 <repositories>
     <repository>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-        <id>bintray-big-data-maven</id>
-        <name>bintray</name>
-        <url>https://dl.bintray.com/big-data/maven</url>
+      <id>jcenter</id>
+      <url>https://jcenter.bintray.com/</url>
     </repository>
 </repositories>
 ```

@@ -61,6 +61,9 @@ public class FaceAnnotation {
 		this.landmarks = landmarks;
 	}
 
+	/**
+	 * Face landmark has type (e.g. left eye) and coordinates where it appears in the picture.
+	 */
 	public static class Landmark {
 		public enum LandmarkType {
 			LEFT_EYE,

@@ -39,7 +39,7 @@ public class FaceAlignmentSample {
 
 	public static void main(String[] args) throws IOException {
 
-		MtcnnService mtcnnService = new MtcnnService(30, 0.709, new double[] { 0.6, 0.7, 0.7 });
+		MtcnnService mtcnnService = new MtcnnService(20, 0.709, new double[] { 0.6, 0.7, 0.7 });
 
 		// Image loading and conversion utilities (part of DataVec)
 		Java2DNativeImageLoader imageLoader = new Java2DNativeImageLoader();
