@@ -25,13 +25,13 @@
 		<!--<nd4j.version>1.0.0-beta2</nd4j.version>-->
 		<nd4j.version>1.0.0-SNAPSHOT</nd4j.version>
 
-		<tensorflow.version>1.9.0</tensorflow.version>
-		<javacpp-presets.version>1.4.2</javacpp-presets.version>
+		<tensorflow.version>1.11.0</tensorflow.version>
+		<javacpp-presets.version>1.4.3</javacpp-presets.version>
 
-		<openblas.version>0.3.0</openblas.version>
+		<openblas.version>0.3.3</openblas.version>
 
-		<mkl.version>2018.3</mkl.version>
-		<mkl-dnn.version>0.15</mkl-dnn.version>
+		<mkl.version>2019.0</mkl.version>
+		<mkl-dnn.version>0.16</mkl-dnn.version>
 		<jmh.version>1.21</jmh.version>
 		<apache.commons>1.17</apache.commons>
 		<spring-framework.version>5.0.7.RELEASE</spring-framework.version>

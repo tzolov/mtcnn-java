@@ -16,11 +16,15 @@
 package net.tzolov.cv.mtcnn;
 
 import java.io.IOException;
+import java.io.InputStream;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.util.StreamUtils;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.junit.Assert.assertThat;
@@ -49,6 +53,23 @@ public class MtcnnServiceTest {
 				"{\"type\":\"NOSE\",\"position\":{\"x\":124,\"y\":136}}," +
 				"{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":105,\"y\":160}}," +
 				"{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":146,\"y\":160}}]}]"));
+	}
+
+	@Test
+	public void testSingeFace2() throws IOException {
+		try (InputStream is = new ClassPathResource("/MarkPollack.png").getInputStream()) {
+			byte[] image = StreamUtils.copyToByteArray(is);
+			FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection(image);
+		}
+		//FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/MarkPollack.png");
+		//assertThat(toJson(faceAnnotations), equalTo("[{\"bbox\":{\"x\":75,\"y\":67,\"w\":95,\"h\":120}," +
+		//		"\"confidence\":0.9994938373565674," +
+		//		"\"landmarks\":[" +
+		//		"{\"type\":\"LEFT_EYE\",\"position\":{\"x\":101,\"y\":113}}," +
+		//		"{\"type\":\"RIGHT_EYE\",\"position\":{\"x\":147,\"y\":113}}," +
+		//		"{\"type\":\"NOSE\",\"position\":{\"x\":124,\"y\":136}}," +
+		//		"{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":105,\"y\":160}}," +
+		//		"{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":146,\"y\":160}}]}]"));
 	}
 
 	@Test
@@ -81,6 +102,19 @@ public class MtcnnServiceTest {
 
 	@Test
 	public void testFacesAlignment() throws IOException {
+		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/pivotal-ipo-nyse.jpg");
+		assertThat(faceAnnotations.length, equalTo(7));
+//		assertThat(toJson(faceAnnotations), equalTo(""));
+	}
+
+	@Test
+	public void testFacesAlignment2() throws IOException {
+		try (InputStream is = new ClassPathResource("/MarkPollack.png").getInputStream()) {
+			byte[] image = StreamUtils.copyToByteArray(is);
+			FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection(image);
+			mtcnnService.faceAlignment(null, faceAnnotations, 44, 160, true);
+		}
+
 		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/pivotal-ipo-nyse.jpg");
 		assertThat(faceAnnotations.length, equalTo(7));
 //		assertThat(toJson(faceAnnotations), equalTo(""));

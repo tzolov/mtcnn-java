@@ -93,11 +93,15 @@ the performance with different images.
 
 ## Caveats
 
-The ND4J, DataVec, ND4J-Tensorflow and JavaCV are build on top of C++ cores. While this has many advantages such 
-as GPU and BLAS CPU math features, off-heap data sharing, low latency they have one significant drawback. By default they 
-will try to bundle all OS platforms (linux, android, windows, macos ..) than can add to up to 1G jar footprint!
+The ND4J, DataVec, ND4J-Tensorflow and JavaCV all rely on core libraries written in C++ (for performance reasons) and wrapped with JNI (e.g JavaCPP) wrapper. 
+This approach has many great advantages such as support for GPU and BLAS math features, off-heap data management, low latency minimal data churn. 
+ Still the approach apparently can induce significant jar footprint. By default if you bundle support for OS platforms (e.g. linux, android, windows, macos ..) 
+ the target Spring Boot jar can grow to the insane 1GB jar footprint!
 
-If you know what your target platform is going to be you can remedy this problem by setting the `-Djavacpp.platform=` property. For example `-Djavacpp.platform=macosx-x86_64` for MacOS target platform.
+If you know what your target platform is going to be then you can remedy this situation by setting the `-Djavacpp.platform=` property. For example `-Djavacpp.platform=macosx-x86_64` for MacOS target platform.
 
-Another long-term solution might be to replace all ND4J, DataVec and JavaCV logic using the newly released Tensorflow Java Ops API (ver. 1.10+)  
+Another possible solution might be to try to substitute the ND4J, DataVec and JavaCV stack using the newly released 
+[]Tensorflow Java Ops API (ver. 1.10+)](https://github.com/tensorflow/tensorflow/releases/tag/v1.10.0) later appear to have the superset of what above stack 
+provides but in a single C++ library with much small footprint. 
+  
      

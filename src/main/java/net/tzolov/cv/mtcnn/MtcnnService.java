@@ -150,6 +150,7 @@ public class MtcnnService {
 	public FaceAnnotation[] faceDetection(byte[] byteImage) throws IOException {
 		ByteArrayInputStream is = new ByteArrayInputStream(byteImage);
 		BufferedImage bufferedImage = ImageIO.read(is);
+		bufferedImage = MtcnnUtil.to3ByteBGR(bufferedImage);
 		return faceDetection(bufferedImage);
 	}
 
@@ -353,7 +354,7 @@ public class MtcnnService {
 	private INDArray refinementStage(INDArray image, INDArray totalBoxes, MtcnnUtil.PadResult padResult) throws IOException {
 
 		// num_boxes = total_boxes.shape[0]
-		int numBoxes = totalBoxes.isEmpty() ? 0 : (int)totalBoxes.shape()[0];
+		int numBoxes = totalBoxes.isEmpty() ? 0 : (int) totalBoxes.shape()[0];
 		// if num_boxes == 0:
 		//   return total_boxes, stage_status
 		if (numBoxes == 0) {

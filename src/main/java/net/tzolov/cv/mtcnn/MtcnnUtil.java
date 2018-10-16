@@ -697,6 +697,15 @@ public class MtcnnUtil {
 		return ((DataBufferByte) bufferedImage.getRaster().getDataBuffer()).getData();
 	}
 
+	public static BufferedImage to3ByteBGR(BufferedImage image) {
+		if (image.getType() == BufferedImage.TYPE_3BYTE_BGR) {
+			return image;
+		}
+		BufferedImage outputImage = new BufferedImage(image.getWidth(), image.getHeight(), BufferedImage.TYPE_3BYTE_BGR);
+		outputImage.getGraphics().drawImage(image, 0, 0, null);
+		return outputImage;
+	}
+
 	public static float[] imageByteToFloatArray(byte[] imageBytes) {
 		float[] fa = new float[imageBytes.length];
 		for (int i = 0; i < imageBytes.length; i++) {
