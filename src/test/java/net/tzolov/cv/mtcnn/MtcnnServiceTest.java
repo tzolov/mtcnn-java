@@ -15,6 +15,9 @@
  */
 package net.tzolov.cv.mtcnn;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.Assert.assertThat;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -22,12 +25,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
-
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.util.StreamUtils;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.Assert.assertThat;
 
 /**
  * @author Christian Tzolov
@@ -45,33 +44,16 @@ public class MtcnnServiceTest {
 	@Test
 	public void testSingeFace() throws IOException {
 		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/Anthony_Hopkins_0002.jpg");
-		assertThat(toJson(faceAnnotations), equalTo("[{\"bbox\":{\"x\":75,\"y\":67,\"w\":95,\"h\":120}," +
-				"\"confidence\":0.9994938373565674," +
-				"\"landmarks\":[" +
-				"{\"type\":\"LEFT_EYE\",\"position\":{\"x\":101,\"y\":113}}," +
-				"{\"type\":\"RIGHT_EYE\",\"position\":{\"x\":147,\"y\":113}}," +
-				"{\"type\":\"NOSE\",\"position\":{\"x\":124,\"y\":136}}," +
-				"{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":105,\"y\":160}}," +
-				"{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":146,\"y\":160}}]}]"));
+		assertThat(toJson(faceAnnotations), equalTo("[{\"bbox\":{\"x\":72,\"y\":64,\"w\":101,\"h\":124}," 
+			+ "\"confidence\":0.9997498393058777," 
+			+ "\"landmarks\":" 
+			+ "[{\"type\":\"LEFT_EYE\",\"position\":{\"x\":102,\"y\":113}}," 
+			+ "{\"type\":\"RIGHT_EYE\",\"position\":{\"x\":149,\"y\":113}}," 
+			+ "{\"type\":\"NOSE\",\"position\":{\"x\":125,\"y\":136}}," 
+			+ "{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":104,\"y\":159}}," 
+			+ "{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":146,\"y\":160}}]}]"));
 	}
-
-	@Test
-	public void testSingeFace2() throws IOException {
-		try (InputStream is = new ClassPathResource("/MarkPollack.png").getInputStream()) {
-			byte[] image = StreamUtils.copyToByteArray(is);
-			FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection(image);
-		}
-		//FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/MarkPollack.png");
-		//assertThat(toJson(faceAnnotations), equalTo("[{\"bbox\":{\"x\":75,\"y\":67,\"w\":95,\"h\":120}," +
-		//		"\"confidence\":0.9994938373565674," +
-		//		"\"landmarks\":[" +
-		//		"{\"type\":\"LEFT_EYE\",\"position\":{\"x\":101,\"y\":113}}," +
-		//		"{\"type\":\"RIGHT_EYE\",\"position\":{\"x\":147,\"y\":113}}," +
-		//		"{\"type\":\"NOSE\",\"position\":{\"x\":124,\"y\":136}}," +
-		//		"{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":105,\"y\":160}}," +
-		//		"{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":146,\"y\":160}}]}]"));
-	}
-
+	
 	@Test
 	public void testFailToDetectFace() throws IOException {
 		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/broken.png");
@@ -81,22 +63,18 @@ public class MtcnnServiceTest {
 	@Test
 	public void testMultiFaces() throws IOException {
 		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/VikiMaxiAdi.jpg");
-		assertThat(toJson(faceAnnotations), equalTo("[{\"bbox\":{\"x\":102,\"y\":152,\"w\":70,\"h\":86}," +
-				"\"confidence\":0.9999865293502808," +
-				"\"landmarks\":[" +
-				"{\"type\":\"LEFT_EYE\",\"position\":{\"x\":122,\"y\":189}}," +
-				"{\"type\":\"RIGHT_EYE\",\"position\":{\"x\":154,\"y\":190}}," +
-				"{\"type\":\"NOSE\",\"position\":{\"x\":136,\"y\":203}}," +
-				"{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":122,\"y\":219}}," +
-				"{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":151,\"y\":220}}]}," +
-				"{\"bbox\":{\"x\":332,\"y\":94,\"w\":57,\"h\":69}," +
-				"\"confidence\":0.9992565512657166," +
-				"\"landmarks\":[" +
-				"{\"type\":\"LEFT_EYE\",\"position\":{\"x\":346,\"y\":120}}," +
-				"{\"type\":\"RIGHT_EYE\",\"position\":{\"x\":373,\"y\":121}}," +
-				"{\"type\":\"NOSE\",\"position\":{\"x\":357,\"y\":134}}," +
-				"{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":346,\"y\":147}}," +
-				"{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":370,\"y\":148}}]}]"));
+		assertThat(faceAnnotations.length, equalTo(3));
+		assertThat(toJson(faceAnnotations), equalTo(
+			"[{\"bbox\":{\"x\":102,\"y\":155,\"w\":69,\"h\":81},\"confidence\":0.9999865293502808," 
+				+ "\"landmarks\":[{\"type\":\"LEFT_EYE\",\"position\":{\"x\":121,\"y\":188}}," 
+				+ "{\"type\":\"RIGHT_EYE\",\"position\":{\"x\":153,\"y\":190}}," 
+				+ "{\"type\":\"NOSE\",\"position\":{\"x\":135,\"y\":204}},{\"type\":\"MOUTH_LEFT\",\"position\"" 
+				+ ":{\"x\":120,\"y\":218}},{\"type\":\"MOUTH_RIGHT\",\"position\":{\"x\":148,\"y\":221}}]}," 
+				+ "{\"bbox\":{\"x\":333,\"y\":97,\"w\":54,\"h\":65},\"confidence\":0.9999747276306152,\"landmarks\":" 
+				+ "[{\"type\":\"LEFT_EYE\",\"position\":{\"x\":346,\"y\":120}},{\"type\":\"RIGHT_EYE\",\"position\"" 
+				+ ":{\"x\":372,\"y\":120}},{\"type\":\"NOSE\",\"position\":{\"x\":357,\"y\":133}}," 
+				+ "{\"type\":\"MOUTH_LEFT\",\"position\":{\"x\":347,\"y\":147}},{\"type\":\"MOUTH_RIGHT\"," 
+				+ "\"position\":{\"x\":369,\"y\":148}}]}]"));
 	}
 
 
@@ -104,12 +82,17 @@ public class MtcnnServiceTest {
 	public void testFacesAlignment() throws IOException {
 		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/pivotal-ipo-nyse.jpg");
 		assertThat(faceAnnotations.length, equalTo(7));
-//		assertThat(toJson(faceAnnotations), equalTo(""));
 	}
 
 	@Test
+	public void testFaceDetection() throws IOException {
+		FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection("classpath:/multiple-faces-5.jpg");
+		assertThat(faceAnnotations.length, equalTo(5));
+	}
+	
+	@Test
 	public void testFacesAlignment2() throws IOException {
-		try (InputStream is = new ClassPathResource("/MarkPollack.png").getInputStream()) {
+		try (InputStream is = new ClassPathResource("classpath:/MarkPollack.jpg").getInputStream()) {
 			byte[] image = StreamUtils.copyToByteArray(is);
 			FaceAnnotation[] faceAnnotations = mtcnnService.faceDetection(image);
 			mtcnnService.faceAlignment(null, faceAnnotations, 44, 160, true);

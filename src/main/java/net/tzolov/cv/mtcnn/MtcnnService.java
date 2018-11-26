@@ -15,6 +15,12 @@
  */
 package net.tzolov.cv.mtcnn;
 
+import static net.tzolov.cv.mtcnn.MtcnnUtil.CHANNEL_COUNT;
+import static net.tzolov.cv.mtcnn.MtcnnUtil.C_ORDERING;
+import static org.nd4j.linalg.indexing.NDArrayIndex.all;
+import static org.nd4j.linalg.indexing.NDArrayIndex.interval;
+import static org.nd4j.linalg.indexing.NDArrayIndex.point;
+
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,16 +45,9 @@ import org.nd4j.linalg.indexing.INDArrayIndex;
 import org.nd4j.linalg.indexing.SpecifiedIndex;
 import org.nd4j.linalg.ops.transforms.Transforms;
 import org.nd4j.tensorflow.conversion.graphrunner.GraphRunner;
-import org.tensorflow.framework.ConfigProto;
-
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.util.Assert;
-
-import static net.tzolov.cv.mtcnn.MtcnnUtil.CHANNEL_COUNT;
-import static net.tzolov.cv.mtcnn.MtcnnUtil.C_ORDERING;
-import static org.nd4j.linalg.indexing.NDArrayIndex.all;
-import static org.nd4j.linalg.indexing.NDArrayIndex.interval;
-import static org.nd4j.linalg.indexing.NDArrayIndex.point;
+import org.tensorflow.framework.ConfigProto;
 
 /**
  * @author Christian Tzolov
@@ -92,10 +91,18 @@ public class MtcnnService {
 
 		this.imageLoader = new Java2DNativeImageLoader();
 
-		this.proposeNetGraphRunner = this.createGraphRunner(TF_PNET_MODEL_URI, "pnet/input");
-		this.refineNetGraphRunner = this.createGraphRunner(TF_RNET_MODEL_URI, "rnet/input");
-		this.outputNetGraphRunner = this.createGraphRunner(TF_ONET_MODEL_URI, "onet/input");
+		// this.proposeNetGraphRunner = this.createGraphRunner(TF_PNET_MODEL_URI, "pnet/input");
+		// this.refineNetGraphRunner = this.createGraphRunner(TF_RNET_MODEL_URI, "rnet/input");
+		// this.outputNetGraphRunner = this.createGraphRunner(TF_ONET_MODEL_URI, "onet/input");
 
+		this.proposeNetGraphRunner =
+			this.createGraphRunner(TF_PNET_MODEL_URI, "pnet/input", "pnet/conv4-2/BiasAdd", "pnet/prob1");
+		this.refineNetGraphRunner =
+			this.createGraphRunner(TF_RNET_MODEL_URI, "rnet/input", "rnet/conv5-2/conv5-2", "rnet/prob1");
+		this.outputNetGraphRunner =
+			this.createGraphRunner(TF_ONET_MODEL_URI, "onet/input", "onet/conv6-2/conv6-2", "onet/conv6-3/conv6-3",
+				"onet/prob1");
+		
 		// Experimental
 		//proposeNetGraph = TFGraphMapper.getInstance().importGraph(new DefaultResourceLoader().getResource(TF_PNET_MODEL_URI).getInputStream());
 		//refineNetGraph = TFGraphMapper.getInstance().importGraph(new DefaultResourceLoader().getResource(TF_RNET_MODEL_URI).getInputStream());
@@ -104,14 +111,34 @@ public class MtcnnService {
 
 	private GraphRunner createGraphRunner(String tensorflowModelUri, String inputLabel) {
 		try {
+
+			ConfigProto configProto =
+				ConfigProto.newBuilder().setInterOpParallelismThreads(4).setAllowSoftPlacement(true)
+					.setLogDevicePlacement(true).build();
+			
 			return new GraphRunner(
 					IOUtils.toByteArray(new DefaultResourceLoader().getResource(tensorflowModelUri).getInputStream()),
-					Arrays.asList(inputLabel),
-					ConfigProto.getDefaultInstance());
+				Arrays.asList(inputLabel), configProto);
 		}
 		catch (IOException e) {
 			throw new IllegalStateException(String.format("Failed to load TF model [%s] and input [%s]:",
 					tensorflowModelUri, inputLabel), e);
+		}
+	}
+
+	private GraphRunner createGraphRunner(String tensorflowModelUri, String inputLabel, String... outLabel) {
+		try {
+
+			ConfigProto cp =
+				ConfigProto.newBuilder().setInterOpParallelismThreads(Runtime.getRuntime().availableProcessors() * 2)
+					.setAllowSoftPlacement(true).setLogDevicePlacement(true).build();
+
+			return new GraphRunner(
+				IOUtils.toByteArray(new DefaultResourceLoader().getResource(tensorflowModelUri).getInputStream()),
+				Arrays.asList(inputLabel), Arrays.asList(outLabel), cp);
+		} catch (IOException e) {
+			throw new IllegalStateException(
+				String.format("Failed to load TF model [%s] and input [%s]:", tensorflowModelUri, inputLabel), e);
 		}
 	}
 

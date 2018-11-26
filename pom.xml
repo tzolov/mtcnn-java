@@ -22,8 +22,8 @@
 	</licenses>
 
 	<properties>
-		<!--<nd4j.version>1.0.0-beta2</nd4j.version>-->
-		<nd4j.version>1.0.0-SNAPSHOT</nd4j.version>
+		<nd4j.version>1.0.0-beta3</nd4j.version>
+		<!--<nd4j.version>1.0.0-SNAPSHOT</nd4j.version>-->
 
 		<tensorflow.version>1.11.0</tensorflow.version>
 		<javacpp-presets.version>1.4.3</javacpp-presets.version>
